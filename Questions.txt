@@ -1,0 +1,29 @@
+What is your age?
+
+What is your gender?
+Options : Male, Female, Other
+
+#Main decider 
+In the two weeks before you felt sick, did you:
+Have contact with someone diagnosed with COVID-19
+Live in or visit a place where COVID-19 is spreading
+Option: yes or no
+
+Do you have any of the following?
+Options:
+Fever or feeling feverish(chills,sweats)
+Shortness of breath
+Cough
+Other
+
+Do you have any of the following conditions (check any)?
+Chronic lung disease or moderate to severe asthma
+Congestive heart failure
+Diabetes with complications
+Neurologic conditions that weaken ability to cough
+Weakened immune system
+Dialysis
+Cirrhosis of the liver
+Extreme obesity (Body Mass Index [BMI] greater than or equal to 40)
+None of the above
+
