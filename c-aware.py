@@ -15,6 +15,15 @@ FIRST, SECOND = range(2)
 
 
 def start(update, context):
+    # Get CallbackQuery from Update
+    query = update.callback_query
+    # Get Bot from CallbackContext
+    bot = context.bot
+    if query != None:
+        bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text = query.message.text)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -31,41 +40,43 @@ def start(update, context):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text('What can I do for you?',
+    bot.send_message(
+        chat_id=update.effective_chat.id,
+        text = 'What can I do for you?',
                               reply_markup=reply_markup)
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return FIRST
 
 
-def start_over(update, context):
-    """Prompt same text & keyboard as `start` does but not as new message"""
-    # Get CallbackQuery from Update
-    query = update.callback_query
-    # Get Bot from CallbackContext
-    bot = context.bot
-    keyboard = [[
-        InlineKeyboardButton("Self Diagnosis \U0001F637",
-                             callback_data='selfdiagnosis')
-    ],
-                [
-                    InlineKeyboardButton(
-                        "View Test Centers Near Me \U0001F3E5",
-                        callback_data='testcenter')
-                ],
-                [
-                    InlineKeyboardButton("Updates about COVID-19 \u23F3",
-                                         callback_data='updates')
-                ]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    # Instead of sending a new message, edit the message that
-    # originated the CallbackQuery. This gives the feeling of an
-    # interactive menu.
-    bot.edit_message_text(chat_id=query.message.chat_id,
-                          message_id=query.message.message_id,
-                          text="What can I do for you?",
-                          reply_markup=reply_markup)
-    return FIRST
+#def start_over(update, context):
+#    """Prompt same text & keyboard as `start` does but not as new message"""
+#    # Get CallbackQuery from Update
+#    query = update.callback_query
+#    # Get Bot from CallbackContext
+#    bot = context.bot
+#    keyboard = [[
+#        InlineKeyboardButton("Self Diagnosis \U0001F637",
+#                             callback_data='selfdiagnosis')
+#    ],
+#                [
+#                    InlineKeyboardButton(
+#                        "View Test Centers Near Me \U0001F3E5",
+#                        callback_data='testcenter')
+#                ],
+#                [
+#                    InlineKeyboardButton("Updates about COVID-19 \u23F3",
+#                                        callback_data='updates')
+#                ]]
+#    reply_markup = InlineKeyboardMarkup(keyboard)
+#    # Instead of sending a new message, edit the message that
+#    # originated the CallbackQuery. This gives the feeling of an
+#    # interactive menu.
+#    bot.edit_message_text(chat_id=query.message.chat_id,
+#                         message_id=query.message.message_id,
+#                          text="What can I do for you?",
+#                          reply_markup=reply_markup)
+#    return FIRST
 
 
 def button(update, context):
@@ -144,7 +155,7 @@ def updates(update, context):
     query = update.callback_query
     bot = context.bot
     keyboard = [[
-        InlineKeyboardButton("Latest News \U0001F4F0",
+        InlineKeyboardButton("Latest News \U0001F5DE",
                              callback_data='latestnews'),
         InlineKeyboardButton("Stats \U0001F4CA", callback_data='stats')
     ],
@@ -192,6 +203,13 @@ def stats(update, context):
     print(update == None)
     query = update.callback_query
     bot = context.bot
+
+    if query != None:
+        bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text = "")
+    
     keyboard = [[
         InlineKeyboardButton("Top 5 Worst Hit Countries",
                              callback_data='worst5')
@@ -228,6 +246,13 @@ def worst5(update, context):
     """Shows Worst 5 Countries Hit by COVID-19"""
     query = update.callback_query
     bot = context.bot
+
+    if query != None:
+        bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text = query.message.text)
+    
     keyboard = [[
         InlineKeyboardButton("Return to Previous Menu \U0001F519",
                              callback_data='return')
@@ -268,7 +293,7 @@ def worst5(update, context):
         str(data[4]['todayDeaths']) + "\n Recovered: " +
         str(data[4]['recovered']),
         reply_markup=reply_markup)
-    return 'st_1'
+    return FIRST
 
 
 @send_typing_action
@@ -276,6 +301,13 @@ def least5(update, context):
     """Shows Worst 5 Countries Hit by COVID-19"""
     query = update.callback_query
     bot = context.bot
+
+    if query != None:
+        bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text = query.message.text)
+    
     keyboard = [[
         InlineKeyboardButton("Return to Previous Menu \U0001F519",
                              callback_data='return')
@@ -317,8 +349,32 @@ def least5(update, context):
         str(data[0]['todayDeaths']) + "\n Recovered: " +
         str(data[0]['recovered']),
         reply_markup=reply_markup)
-    return 'st_1'
+    return FIRST
 
+def news(update, context):
+    query = update.callback_query
+    bot = context.bot
+    if query != None:
+        bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text = "")
+    bot.send_message(
+        chat_id=update.effective_chat.id, text = "\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
+    r = requests.get('http://newsapi.org/v2/top-headlines?q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5')
+    data = r.json()
+    data = data['articles']
+    bot.send_photo(chat_id=query.message.chat_id, photo=data[0]['urlToImage'], caption = data[0]['title'] + "\n\n" + data[0]['description'] + "\n\nRead More: " + data[0]['url'])
+    bot.send_photo(chat_id=query.message.chat_id, photo=data[1]['urlToImage'], caption = data[1]['title'] + "\n\n" + data[1]['description'] + "\n\nRead More: " + data[1]['url'])
+    bot.send_photo(chat_id=query.message.chat_id, photo=data[2]['urlToImage'], caption = data[2]['title'] + "\n\n" + data[2]['description'] + "\n\nRead More: " + data[2]['url'])
+    keyboard = [[
+        InlineKeyboardButton("Return to Previous Menu \U0001F519",
+                             callback_data='return')
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot.send_message(
+        chat_id=update.effective_chat.id,reply_markup=reply_markup)
+    return FIRST
 
 def main():
     # Create the Updater and pass it your bot's token.
@@ -343,15 +399,15 @@ def main():
                 CallbackQueryHandler(updates, pattern='^' + 'updates' + '$')
             ],
             'Update1': [
-                CallbackQueryHandler(button, pattern='^' + 'latestnews' + '$'),
+                CallbackQueryHandler(news, pattern='^' + 'latestnews' + '$'),
                 CallbackQueryHandler(stats, pattern='^' + 'stats' + '$'),
-                CallbackQueryHandler(start_over, pattern='^' + 'return' + '$')
+                CallbackQueryHandler(start, pattern='^' + 'return' + '$')
             ],
             'st_1': [
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
                 CallbackQueryHandler(button, pattern='^' + 'mycountry' + '$'),
-                CallbackQueryHandler(start_over, pattern='^' + 'return' + '$')
+                CallbackQueryHandler(start, pattern='^' + 'return' + '$')
             ],
             'sd_age': [
                 CallbackQueryHandler(gender, pattern='^' + 'gender1' + '$'),
@@ -369,6 +425,10 @@ def main():
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help))
+    updater.dispatcher.add_handler(CommandHandler('news', news))
+    updater.dispatcher.add_handler(CommandHandler('stats', stats))
+    updater.dispatcher.add_handler(CommandHandler('worst5', worst5))
+    updater.dispatcher.add_handler(CommandHandler('least5', least5))
     updater.dispatcher.add_error_handler(error)
 
     # Start the Bot
