@@ -1,9 +1,11 @@
 import logging
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ChatAction
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
+import telegram
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ChatAction, ReplyKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, Filters
 import requests
 from functools import wraps
 import flag
+import reverse_geocoder as rg 
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -31,13 +33,14 @@ def start(update, context):
                              callback_data='selfdiagnosis')
     ],
                 [
-                    InlineKeyboardButton(
-                        "View Test Centers Near Me \U0001F3E5",
-                        callback_data='testcenter')
+                    
+                    InlineKeyboardButton("COVID-19 News and Stats \u23F3",
+                                         callback_data='updates')
                 ],
                 [
-                    InlineKeyboardButton("Updates about COVID-19 \u23F3",
-                                         callback_data='updates')
+                    InlineKeyboardButton(
+                        "Contact and Helpline \U0001F198",
+                        callback_data='helpline')
                 ]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -293,6 +296,9 @@ def getstats(param):
         r = requests.get(url='https://corona.lmao.ninja/countries?sort=cases')
         data = r.json()
         data = data[-5:]
+    elif param == 'india':
+        r = requests.get(url='https://corona.lmao.ninja/countries/India')
+        data = r.json()
     return data
 
 
@@ -328,7 +334,7 @@ def stats(update, context):
                                          callback_data='least5')
                 ],
                 [
-                    InlineKeyboardButton("Get Stats for my Country",
+                    InlineKeyboardButton("Get India Stats",
                                          callback_data='mycountry')
                 ],
                 [
@@ -458,6 +464,64 @@ def least5(update, context):
         reply_markup=reply_markup)
     return FIRST
 
+@send_typing_action
+def mycountry(update, context):
+    """Shows India COVID-19 Stats"""
+    query = update.callback_query
+    bot = context.bot
+
+    if query != None:
+        bot.edit_message_text(chat_id=update.effective_chat.id,
+                              message_id=query.message.message_id,
+                              text=query.message.text)
+
+    keyboard = [[
+        InlineKeyboardButton("Show Hospital Data \U0001F469", #\U000200D \U0002695
+                             callback_data='showhospitaldata')],
+        [InlineKeyboardButton("Return to Previous Menu \U0001F519",
+                             callback_data='return')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    data = getstats('india')
+    bot.send_message(
+        chat_id=update.effective_chat.id,
+        text= flag.flag('IN') + " India COVID-19 Stats " + flag.flag('IN') + "\n\n" +
+        "Total Cases: " + str(data['cases']) +
+        "\n Cases Today: " + str(data['todayCases']) +
+        "\n Total Deaths: " + str(data['deaths']) +
+        "\n Deaths Today: " + str(data['todayDeaths']) +
+        "\n Recovered: " + str(data['recovered']),
+        reply_markup=reply_markup)
+    return 'mycountry'
+
+def showhospitaldata(update, context):
+    """Shows India COVID-19 Stats"""
+    query = update.callback_query
+    bot = context.bot
+    user = update.effective_message.from_user
+    user_location = update.effective_message.location
+    if user_location == None:
+        location_keyboard = telegram.KeyboardButton(text="send_location", request_location=True)
+        custom_keyboard = [[ location_keyboard]]
+        reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
+        bot.send_message(chat_id=update.effective_chat.id, text="Would you mind sharing your location with me?", reply_markup=reply_markup)
+        return 'mycountry'
+    else:
+        result = rg.search((user_location.latitude, user_location.longitude))
+        print(result[0]['admin1'])
+        r = requests.get('https://api.rootnet.in/covid19-in/stats/hospitals')
+        data = r.json()
+        res = next((sub for sub in data['data']['regional'] if sub['state'] == result[0]['admin1']), None)
+        bot.send_message(
+        chat_id=update.effective_chat.id,
+        text= "\U0001F3E5 " + result[0]['admin1'] + " Hospital Stats \U0001F3E5\n\n" +
+        "Rural Hospitals: " + str(res['ruralHospitals']) +
+        "\n Rural Beds: " + str(res['ruralBeds']) +
+        "\n Urban Hospitals: " + str(res['urbanHospitals']) +
+        "\n Urban Beds: " + str(res['urbanBeds']) +
+        "\n Total Hospitals: " + str(res['totalHospitals']) +
+        "\n Total Beds: " + str(res['totalBeds']))
+        FIRST = start(update, context)
+        return FIRST
 
 def news(update, context):
     query = update.callback_query
@@ -470,7 +534,7 @@ def news(update, context):
         chat_id=update.effective_chat.id,
         text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
     r = requests.get(
-        'http://newsapi.org/v2/top-headlines?q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
+        'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
     )
     data = r.json()
     data = data['articles']
@@ -489,7 +553,33 @@ def news(update, context):
     FIRST = start(update, context)
     return FIRST
 
-
+def helpline(update, context):
+    query = update.callback_query
+    bot = context.bot
+    user = update.effective_message.from_user
+    user_location = update.effective_message.location
+    if user_location == None:
+        location_keyboard = telegram.KeyboardButton(text="send_location", request_location=True)
+        custom_keyboard = [[ location_keyboard]]
+        reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
+        bot.send_message(chat_id=update.effective_chat.id, text="Would you mind sharing your location with me?", reply_markup=reply_markup)
+    else:
+        result = rg.search((user_location.latitude, user_location.longitude))
+        print(result[0]['admin1'])
+        r = requests.get('https://api.rootnet.in/covid19-in/contacts')
+        data = r.json()
+        res = next((sub for sub in data['data']['contacts']['regional'] if sub['loc'] == result[0]['admin1']), None)
+        bot.send_message(chat_id = update.effective_chat.id,
+                         text = "\U0001F4F2 COVID-19 Helpline Contacts \U0001F4F2\n\n" +
+                         res['loc'] + " State Number - " + res['number'] + "\n" +
+                         "National Number - " + data['data']['contacts']['primary']['number'] + "\n" +
+                         "Toll Free Number - " + data['data']['contacts']['primary']['number-tollfree'] + "\n" +
+                         "Email - " + data['data']['contacts']['primary']['email'] + "\n" +
+                         "Twitter - " + data['data']['contacts']['primary']['twitter'] + "\n" +
+                         "Facebook - " + data['data']['contacts']['primary']['facebook'] + "\n")
+        FIRST = start(update, context)
+        return FIRST
+    
 def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
@@ -505,23 +595,18 @@ def main():
     # So ^ABC$ will only allow 'ABC'
     conv_handler = ConversationHandler(
         entry_points=[
-            CommandHandler('start', start),
-            CommandHandler('news', news),
-            CommandHandler('stats', stats),
-            CommandHandler('worst5', worst5),
-            CommandHandler('least5', least5)
-        ],
+            CommandHandler('start', start)],
         states={
             FIRST: [
-                CallbackQueryHandler(selfdiagnosis,
-                                     pattern='^' + 'selfdiagnosis' + '$'),
-                CallbackQueryHandler(button, pattern='^' + 'testcenter' + '$'),
+                MessageHandler(Filters.location, helpline),
+                CallbackQueryHandler(selfdiagnosis, pattern='^' + 'selfdiagnosis' + '$'),
+                CallbackQueryHandler(helpline, pattern='^' + 'helpline' + '$'),
                 CallbackQueryHandler(updates, pattern='^' + 'updates' + '$'),
                 CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
-                CallbackQueryHandler(button, pattern='^' + 'mycountry' + '$'),
-                CallbackQueryHandler(stats, pattern='^' + 'stats' + '$')
+                CallbackQueryHandler(mycountry, pattern='^' + 'mycountry' + '$'),
+                CallbackQueryHandler(stats, pattern='^' + 'stats' + '$'),
             ],
             'Update1': [
                 CallbackQueryHandler(news, pattern='^' + 'latestnews' + '$'),
@@ -531,7 +616,7 @@ def main():
             'st_1': [
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
-                CallbackQueryHandler(button, pattern='^' + 'mycountry' + '$'),
+                CallbackQueryHandler(mycountry, pattern='^' + 'mycountry' + '$'),
                 CallbackQueryHandler(start, pattern='^' + 'return' + '$')
             ],
             'sd_1': [
@@ -559,12 +644,19 @@ def main():
                                      pattern='^' + 'diagnosis1' + '$'),
                 CallbackQueryHandler(diagnosis,
                                      pattern='^' + 'diagnosis0' + '$'),
-            ]
+            ],
+            'mycountry' : [MessageHandler(Filters.location, showhospitaldata),
+                           CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
+                           CallbackQueryHandler(showhospitaldata, pattern='^' + 'showhospitaldata' + '$')]
         },
         fallbacks=[CommandHandler('start', start)])
 
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CommandHandler('news', news))
+    updater.dispatcher.add_handler(CommandHandler('stats', stats))
+    updater.dispatcher.add_handler(CommandHandler('worst5', worst5))
+    updater.dispatcher.add_handler(CommandHandler('least5', least5))
     updater.dispatcher.add_handler(CommandHandler('help', help))
     updater.dispatcher.add_error_handler(error)
 
