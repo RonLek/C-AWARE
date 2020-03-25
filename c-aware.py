@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 # Stages
 FIRST, SECOND = range(2)
 
+sd_decider = 0
+sd_secondarydecider = 0
+
 
 def start(update, context):
     # Get CallbackQuery from Update
@@ -113,7 +116,7 @@ def selfdiagnosis(update, context):
                           message_id=query.message.message_id,
                           text="What is your age?",
                           reply_markup=reply_markup)
-    return 'sd_age'
+    return 'sd_1'
 
 
 def gender(update, context):
@@ -130,7 +133,7 @@ def gender(update, context):
                           message_id=query.message.message_id,
                           text="What is your gender?",
                           reply_markup=reply_markup)
-    return 'sd_age'
+    return 'sd_1'
 
 
 def decider(update, context):
@@ -139,15 +142,123 @@ def decider(update, context):
     print(val)
     bot = context.bot
     keyboard = [[
-        InlineKeyboardButton("Male", callback_data='decider'),
-        InlineKeyboardButton("Female", callback_data='decider'),
+        InlineKeyboardButton("Yes", callback_data='symptomfever1'),
+        InlineKeyboardButton("No", callback_data='symptomfever0'),
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text="In the two weeks before you felt sick, did you: " +
+        "Have contact with someone diagnosed with COVID-19" +
+        "Live in or visit a place where COVID-19 is spreading",
+        reply_markup=reply_markup)
+    return 'sd_1'
+
+
+def symptomfever(update, context):
+    query = update.callback_query
+    val = query.data
+    print(val)
+    global sd_decider
+    for x in val:
+        if x.isdigit():
+            if int(x) == 1:
+                sd_decider = 1
+    bot = context.bot
+    keyboard = [[
+        InlineKeyboardButton("Yes", callback_data='symptombreath1'),
+        InlineKeyboardButton("No", callback_data='symptombreath0'),
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text="Do you have fever or feeling feverish(chills,sweats)?",
+        reply_markup=reply_markup)
+    return 'sd_1'
+
+
+def symptombreath(update, context):
+    query = update.callback_query
+    val = query.data
+    print(val)
+    global sd_secondarydecider
+    for x in val:
+        if x.isdigit():
+            if int(x) == 1:
+                sd_secondarydecider = 1
+    bot = context.bot
+    keyboard = [[
+        InlineKeyboardButton("Yes", callback_data='symptomcough1'),
+        InlineKeyboardButton("No", callback_data='symptomcough0'),
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.edit_message_text(chat_id=query.message.chat_id,
                           message_id=query.message.message_id,
-                          text="What is your gender?",
+                          text="Do you have shortness of breath?",
                           reply_markup=reply_markup)
-    return 'sd_age'
+    return 'sd_1'
+
+
+def symptomcough(update, context):
+    query = update.callback_query
+    val = query.data
+    print(val)
+    global sd_secondarydecider
+    for x in val:
+        if x.isdigit():
+            if int(x) == 1:
+                sd_secondarydecider = 1
+    bot = context.bot
+    keyboard = [[
+        InlineKeyboardButton("Yes", callback_data='diagnosis1'),
+        InlineKeyboardButton("No", callback_data='diagnosis0'),
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot.edit_message_text(chat_id=query.message.chat_id,
+                          message_id=query.message.message_id,
+                          text="Do you have cough?",
+                          reply_markup=reply_markup)
+    return 'sd_1'
+
+
+def diagnosis(update, context):
+    query = update.callback_query
+    val = query.data
+    print(val)
+    global sd_secondarydecider
+    for x in val:
+        if x.isdigit():
+            if int(x) == 1:
+                sd_secondarydecider = 1
+    bot = context.bot
+    global sd_decider
+    if sd_decider and sd_secondarydecider:
+        bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=
+            "Stay home and take care of yourself. Call your provider if you get worse."
+            +
+            "Sorry you’re feeling ill. You have one or more symptom(s) that may be related to COVID-19. Stay home and take care of yourself."
+        )
+    elif sd_secondarydecider:
+        bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=
+            "Sorry you’re feeling ill. Call your provider if you get worse." +
+            "Since you haven't directly come in contact with someone diagnosed with COVID-19 or live in or visit a place where COVID-19 "
+            +
+            "is spreading there are less chances of you contracting COVID-19. Stay at home and monitor your symptoms"
+        )
+    else:
+        bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=
+            "Since you haven't directly come in contact with someone diagnosed with COVID-19 or live in or visit a place where COVID-19 "
+            +
+            "is spreading there are less chances of you contracting COVID-19.Please stay indoors."
+        )
 
 
 def updates(update, context):
@@ -409,7 +520,7 @@ def main():
                 CallbackQueryHandler(button, pattern='^' + 'mycountry' + '$'),
                 CallbackQueryHandler(start, pattern='^' + 'return' + '$')
             ],
-            'sd_age': [
+            'sd_1': [
                 CallbackQueryHandler(gender, pattern='^' + 'gender1' + '$'),
                 CallbackQueryHandler(gender, pattern='^' + 'gender2' + '$'),
                 CallbackQueryHandler(gender, pattern='^' + 'gender3' + '$'),
@@ -418,6 +529,22 @@ def main():
                 CallbackQueryHandler(gender, pattern='^' + 'gender6' + '$'),
                 CallbackQueryHandler(gender, pattern='^' + 'gender7' + '$'),
                 CallbackQueryHandler(decider, pattern='^' + 'decider' + '$'),
+                CallbackQueryHandler(symptomfever,
+                                     pattern='^' + 'symptomfever0' + '$'),
+                CallbackQueryHandler(symptomfever,
+                                     pattern='^' + 'symptomfever1' + '$'),
+                CallbackQueryHandler(symptombreath,
+                                     pattern='^' + 'symptombreath1' + '$'),
+                CallbackQueryHandler(symptombreath,
+                                     pattern='^' + 'symptombreath0' + '$'),
+                CallbackQueryHandler(symptomcough,
+                                     pattern='^' + 'symptomcough1' + '$'),
+                CallbackQueryHandler(symptomcough,
+                                     pattern='^' + 'symptomcough0' + '$'),
+                CallbackQueryHandler(diagnosis,
+                                     pattern='^' + 'diagnosis1' + '$'),
+                CallbackQueryHandler(diagnosis,
+                                     pattern='^' + 'diagnosis0' + '$'),
             ]
         },
         fallbacks=[CommandHandler('start', start)])
