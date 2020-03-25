@@ -102,15 +102,15 @@ def selfdiagnosis(update, context):
     val = query.data
     print(val)
     bot = context.bot
-    keyboard = [[
-        InlineKeyboardButton("1-9", callback_data='gender1'),
-        InlineKeyboardButton("10-18", callback_data='gender2'),
-        InlineKeyboardButton("19-29", callback_data='gender3'),
-        InlineKeyboardButton("30-49", callback_data='gender4'),
-        InlineKeyboardButton("50-59", callback_data='gender5'),
-        InlineKeyboardButton("60-79", callback_data='gender6'),
-        InlineKeyboardButton("80+", callback_data='gender7'),
-    ]]
+    keyboard = [
+        [InlineKeyboardButton("1-9", callback_data='gender1')],
+        [InlineKeyboardButton("10-18", callback_data='gender2')],
+        [InlineKeyboardButton("19-29", callback_data='gender3')],
+        [InlineKeyboardButton("30-49", callback_data='gender4')],
+        [InlineKeyboardButton("50-59", callback_data='gender5')],
+        [InlineKeyboardButton("60-79", callback_data='gender6')],
+        [InlineKeyboardButton("80+", callback_data='gender7')],
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.edit_message_text(chat_id=query.message.chat_id,
                           message_id=query.message.message_id,
@@ -317,9 +317,9 @@ def stats(update, context):
 
     if query != None:
         bot.edit_message_text(
-        chat_id=query.message.chat_id,
+        chat_id=update.effective_chat.id,
         message_id=query.message.message_id,
-        text = "")
+        text = "Done")
     
     keyboard = [[
         InlineKeyboardButton("Top 5 Worst Hit Countries",
@@ -360,7 +360,7 @@ def worst5(update, context):
 
     if query != None:
         bot.edit_message_text(
-        chat_id=query.message.chat_id,
+        chat_id=update.effective_chat.id,
         message_id=query.message.message_id,
         text = query.message.text)
     
@@ -415,7 +415,7 @@ def least5(update, context):
 
     if query != None:
         bot.edit_message_text(
-        chat_id=query.message.chat_id,
+        chat_id=update.effective_chat.id,
         message_id=query.message.message_id,
         text = query.message.text)
     
@@ -469,22 +469,16 @@ def news(update, context):
         bot.edit_message_text(
         chat_id=query.message.chat_id,
         message_id=query.message.message_id,
-        text = "")
+        text = "Done")
     bot.send_message(
         chat_id=update.effective_chat.id, text = "\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
     r = requests.get('http://newsapi.org/v2/top-headlines?q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5')
     data = r.json()
     data = data['articles']
-    bot.send_photo(chat_id=query.message.chat_id, photo=data[0]['urlToImage'], caption = data[0]['title'] + "\n\n" + data[0]['description'] + "\n\nRead More: " + data[0]['url'])
-    bot.send_photo(chat_id=query.message.chat_id, photo=data[1]['urlToImage'], caption = data[1]['title'] + "\n\n" + data[1]['description'] + "\n\nRead More: " + data[1]['url'])
-    bot.send_photo(chat_id=query.message.chat_id, photo=data[2]['urlToImage'], caption = data[2]['title'] + "\n\n" + data[2]['description'] + "\n\nRead More: " + data[2]['url'])
-    keyboard = [[
-        InlineKeyboardButton("Return to Previous Menu \U0001F519",
-                             callback_data='return')
-    ]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    bot.send_message(
-        chat_id=update.effective_chat.id,reply_markup=reply_markup)
+    bot.send_photo(chat_id=update.effective_chat.id, photo=data[0]['urlToImage'], caption = data[0]['title'] + "\n\n" + data[0]['description'] + "\n\nRead More: " + data[0]['url'])
+    bot.send_photo(chat_id=update.effective_chat.id, photo=data[1]['urlToImage'], caption = data[1]['title'] + "\n\n" + data[1]['description'] + "\n\nRead More: " + data[1]['url'])
+    bot.send_photo(chat_id=update.effective_chat.id, photo=data[2]['urlToImage'], caption = data[2]['title'] + "\n\n" + data[2]['description'] + "\n\nRead More: " + data[2]['url'])
+    FIRST = start(update, context)
     return FIRST
 
 def main():
@@ -501,13 +495,19 @@ def main():
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
+        entry_points=[CommandHandler('start', start), CommandHandler('news', news), CommandHandler('stats', stats),
+                      CommandHandler('worst5', worst5), CommandHandler('least5', least5)],
         states={
             FIRST: [
                 CallbackQueryHandler(selfdiagnosis,
                                      pattern='^' + 'selfdiagnosis' + '$'),
                 CallbackQueryHandler(button, pattern='^' + 'testcenter' + '$'),
-                CallbackQueryHandler(updates, pattern='^' + 'updates' + '$')
+                CallbackQueryHandler(updates, pattern='^' + 'updates' + '$'),
+                CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
+                CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
+                CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
+                CallbackQueryHandler(button, pattern='^' + 'mycountry' + '$'),
+                CallbackQueryHandler(stats, pattern='^' + 'stats' + '$')
             ],
             'Update1': [
                 CallbackQueryHandler(news, pattern='^' + 'latestnews' + '$'),
@@ -552,10 +552,6 @@ def main():
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help))
-    updater.dispatcher.add_handler(CommandHandler('news', news))
-    updater.dispatcher.add_handler(CommandHandler('stats', stats))
-    updater.dispatcher.add_handler(CommandHandler('worst5', worst5))
-    updater.dispatcher.add_handler(CommandHandler('least5', least5))
     updater.dispatcher.add_error_handler(error)
 
     # Start the Bot
