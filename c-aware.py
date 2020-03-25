@@ -23,10 +23,9 @@ def start(update, context):
     # Get Bot from CallbackContext
     bot = context.bot
     if query != None:
-        bot.edit_message_text(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-        text = query.message.text)
+        bot.edit_message_text(chat_id=query.message.chat_id,
+                              message_id=query.message.message_id,
+                              text=query.message.text)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -43,10 +42,9 @@ def start(update, context):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    bot.send_message(
-        chat_id=update.effective_chat.id,
-        text = 'What can I do for you?',
-                              reply_markup=reply_markup)
+    bot.send_message(chat_id=update.effective_chat.id,
+                     text='What can I do for you?',
+                     reply_markup=reply_markup)
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return FIRST
@@ -149,9 +147,9 @@ def decider(update, context):
     bot.edit_message_text(
         chat_id=query.message.chat_id,
         message_id=query.message.message_id,
-        text="In the two weeks before you felt sick, did you: " +
-        "Have contact with someone diagnosed with COVID-19" +
-        "Live in or visit a place where COVID-19 is spreading",
+        text="In the two weeks before you felt sick, did you: \n" +
+        "1. Have contact with someone diagnosed with COVID-19 or \n" +
+        "2. Live in or visit a place where COVID-19 is spreading",
         reply_markup=reply_markup)
     return 'sd_1'
 
@@ -174,7 +172,8 @@ def symptomfever(update, context):
     bot.edit_message_text(
         chat_id=query.message.chat_id,
         message_id=query.message.message_id,
-        text="Do you have fever or feeling feverish(chills,sweats)?",
+        text=
+        "Do you have fever or feeling feverish(chills,sweats) \U0001F912 ?",
         reply_markup=reply_markup)
     return 'sd_1'
 
@@ -196,7 +195,7 @@ def symptombreath(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.edit_message_text(chat_id=query.message.chat_id,
                           message_id=query.message.message_id,
-                          text="Do you have shortness of breath?",
+                          text="Do you have shortness of breath \U0001F975 ?",
                           reply_markup=reply_markup)
     return 'sd_1'
 
@@ -218,7 +217,7 @@ def symptomcough(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.edit_message_text(chat_id=query.message.chat_id,
                           message_id=query.message.message_id,
-                          text="Do you have cough?",
+                          text="Do you have cough \U0001F927?",
                           reply_markup=reply_markup)
     return 'sd_1'
 
@@ -240,7 +239,7 @@ def diagnosis(update, context):
             text=
             "Stay home and take care of yourself. Call your provider if you get worse."
             +
-            "Sorry you’re feeling ill. You have one or more symptom(s) that may be related to COVID-19. Stay home and take care of yourself."
+            "Sorry you’re feeling ill. You have one or more symptom(s) that may be related to COVID-19."
         )
     elif sd_secondarydecider:
         bot.send_message(
@@ -257,7 +256,7 @@ def diagnosis(update, context):
             text=
             "Since you haven't directly come in contact with someone diagnosed with COVID-19 or live in or visit a place where COVID-19 "
             +
-            "is spreading there are less chances of you contracting COVID-19.Please stay indoors."
+            "is spreading there are less chances of you contracting COVID-19.\n Please stay indoors."
         )
 
 
@@ -316,11 +315,10 @@ def stats(update, context):
     bot = context.bot
 
     if query != None:
-        bot.edit_message_text(
-        chat_id=update.effective_chat.id,
-        message_id=query.message.message_id,
-        text = "Done")
-    
+        bot.edit_message_text(chat_id=update.effective_chat.id,
+                              message_id=query.message.message_id,
+                              text="Done")
+
     keyboard = [[
         InlineKeyboardButton("Top 5 Worst Hit Countries",
                              callback_data='worst5')
@@ -359,11 +357,10 @@ def worst5(update, context):
     bot = context.bot
 
     if query != None:
-        bot.edit_message_text(
-        chat_id=update.effective_chat.id,
-        message_id=query.message.message_id,
-        text = query.message.text)
-    
+        bot.edit_message_text(chat_id=update.effective_chat.id,
+                              message_id=query.message.message_id,
+                              text=query.message.text)
+
     keyboard = [[
         InlineKeyboardButton("Return to Previous Menu \U0001F519",
                              callback_data='return')
@@ -414,11 +411,10 @@ def least5(update, context):
     bot = context.bot
 
     if query != None:
-        bot.edit_message_text(
-        chat_id=update.effective_chat.id,
-        message_id=query.message.message_id,
-        text = query.message.text)
-    
+        bot.edit_message_text(chat_id=update.effective_chat.id,
+                              message_id=query.message.message_id,
+                              text=query.message.text)
+
     keyboard = [[
         InlineKeyboardButton("Return to Previous Menu \U0001F519",
                              callback_data='return')
@@ -462,24 +458,37 @@ def least5(update, context):
         reply_markup=reply_markup)
     return FIRST
 
+
 def news(update, context):
     query = update.callback_query
     bot = context.bot
     if query != None:
-        bot.edit_message_text(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-        text = "Done")
+        bot.edit_message_text(chat_id=query.message.chat_id,
+                              message_id=query.message.message_id,
+                              text="Done")
     bot.send_message(
-        chat_id=update.effective_chat.id, text = "\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
-    r = requests.get('http://newsapi.org/v2/top-headlines?q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5')
+        chat_id=update.effective_chat.id,
+        text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
+    r = requests.get(
+        'http://newsapi.org/v2/top-headlines?q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
+    )
     data = r.json()
     data = data['articles']
-    bot.send_photo(chat_id=update.effective_chat.id, photo=data[0]['urlToImage'], caption = data[0]['title'] + "\n\n" + data[0]['description'] + "\n\nRead More: " + data[0]['url'])
-    bot.send_photo(chat_id=update.effective_chat.id, photo=data[1]['urlToImage'], caption = data[1]['title'] + "\n\n" + data[1]['description'] + "\n\nRead More: " + data[1]['url'])
-    bot.send_photo(chat_id=update.effective_chat.id, photo=data[2]['urlToImage'], caption = data[2]['title'] + "\n\n" + data[2]['description'] + "\n\nRead More: " + data[2]['url'])
+    bot.send_photo(chat_id=update.effective_chat.id,
+                   photo=data[0]['urlToImage'],
+                   caption=data[0]['title'] + "\n\n" + data[0]['description'] +
+                   "\n\nRead More: " + data[0]['url'])
+    bot.send_photo(chat_id=update.effective_chat.id,
+                   photo=data[1]['urlToImage'],
+                   caption=data[1]['title'] + "\n\n" + data[1]['description'] +
+                   "\n\nRead More: " + data[1]['url'])
+    bot.send_photo(chat_id=update.effective_chat.id,
+                   photo=data[2]['urlToImage'],
+                   caption=data[2]['title'] + "\n\n" + data[2]['description'] +
+                   "\n\nRead More: " + data[2]['url'])
     FIRST = start(update, context)
     return FIRST
+
 
 def main():
     # Create the Updater and pass it your bot's token.
@@ -495,8 +504,13 @@ def main():
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start), CommandHandler('news', news), CommandHandler('stats', stats),
-                      CommandHandler('worst5', worst5), CommandHandler('least5', least5)],
+        entry_points=[
+            CommandHandler('start', start),
+            CommandHandler('news', news),
+            CommandHandler('stats', stats),
+            CommandHandler('worst5', worst5),
+            CommandHandler('least5', least5)
+        ],
         states={
             FIRST: [
                 CallbackQueryHandler(selfdiagnosis,
