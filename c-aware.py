@@ -47,7 +47,15 @@ def start(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     bot.send_message(chat_id=update.effective_chat.id,
-                     text='What can I do for you?',
+                     text="Hi, I\'m the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India." +
+                              "\n\nYou can control me by sending these commands:\n\n"+
+                              "/start - Start the Bot\n"+
+                              "/notify - Automatic News Updates (10 hours)\n" + 
+                              "/news - Top 3 News about COVID-19 in India\n"+
+                              "/stats - World COVID-19 Stats\n"+
+                              "/worst5 - Countries Worst Hit by the coronavirus\n"+
+                              "/least5 - Countries Least Hit by the coronavirus\n"+
+                              "/india - India COVID-19 Stats and Hospital Data",
                      reply_markup=reply_markup)
 
     
@@ -56,34 +64,39 @@ def start(update, context):
     return FIRST
 
 
-#def start_over(update, context):
-#    """Prompt same text & keyboard as `start` does but not as new message"""
-#    # Get CallbackQuery from Update
-#    query = update.callback_query
-#    # Get Bot from CallbackContext
-#    bot = context.bot
-#    keyboard = [[
-#        InlineKeyboardButton("Self Diagnosis \U0001F637",
-#                             callback_data='selfdiagnosis')
-#    ],
-#                [
-#                    InlineKeyboardButton(
-#                        "View Test Centers Near Me \U0001F3E5",
-#                        callback_data='testcenter')
-#                ],
-#                [
-#                    InlineKeyboardButton("Updates about COVID-19 \u23F3",
-#                                        callback_data='updates')
-#                ]]
-#    reply_markup = InlineKeyboardMarkup(keyboard)
-#    # Instead of sending a new message, edit the message that
-#    # originated the CallbackQuery. This gives the feeling of an
-#    # interactive menu.
-#    bot.edit_message_text(chat_id=query.message.chat_id,
-#                         message_id=query.message.message_id,
-#                          text="What can I do for you?",
-#                          reply_markup=reply_markup)
-#    return FIRST
+def start_over(update, context):
+    """Prompt same text & keyboard as `start` does but not as new message"""
+    # Get CallbackQuery from Update
+    query = update.callback_query
+    # Get Bot from CallbackContext
+    bot = context.bot
+    if query != None:
+        bot.edit_message_text(chat_id=query.message.chat_id,
+                              message_id=query.message.message_id,
+                              text=query.message.text)
+    keyboard = [[
+        InlineKeyboardButton("Self Diagnosis \U0001F637",
+                             callback_data='selfdiagnosis')
+    ],
+                [
+                    
+                    InlineKeyboardButton("COVID-19 News and Stats \u23F3",
+                                         callback_data='updates')
+                ],
+                [
+                    InlineKeyboardButton(
+                        "Contact and Helpline \U0001F198",
+                        callback_data='helpline')
+                ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Instead of sending a new message, edit the message that
+    # originated the CallbackQuery. This gives the feeling of an
+    # interactive menu.
+    bot.send_message(chat_id=query.message.chat_id,
+                         message_id=query.message.message_id,
+                          text="What can I do for you?",
+                          reply_markup=reply_markup)
+    return FIRST
 
 
 def button(update, context):
@@ -93,7 +106,15 @@ def button(update, context):
 
 
 def help(update, context):
-    update.message.reply_text("Use /start to test this bot.")
+    update.message.reply_text("Hi, I'm the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India."+
+                              "\n\n You can control me by sending these command:\n\n"+
+                              "/start - Start the Bot\n"+
+                              "notify - Automatic News Updates (10 hours)\n" + 
+                              "/news - Top 3 News about COVID-19 in India\n"+
+                              "/stats - World COVID-19 Stats\n"+
+                              "/worst5 - Countries Worst Hit by the coronavirus\n"+
+                              "/least5 - Countries Least Hit by the coronaviurs\n"+
+                              "/india - India COVID-19 Stats and Hospital Data")
 
 
 def error(update, context):
@@ -238,6 +259,10 @@ def diagnosis(update, context):
             if int(x) == 1:
                 sd_secondarydecider = 1
     bot = context.bot
+    if query != None:
+        bot.edit_message_text(chat_id=query.message.chat_id,
+                              message_id=query.message.message_id,
+                              text="Done")
     global sd_decider
     if sd_decider and sd_secondarydecider:
         bot.send_message(
@@ -264,6 +289,8 @@ def diagnosis(update, context):
             +
             "is spreading there are less chances of you contracting COVID-19.\n Please stay indoors."
         )
+        FIRST = start_over(update, context)
+        return FIRST
 
 
 def updates(update, context):
@@ -523,7 +550,7 @@ def showhospitaldata(update, context):
         "\n Urban Beds: " + str(res['urbanBeds']) +
         "\n Total Hospitals: " + str(res['totalHospitals']) +
         "\n Total Beds: " + str(res['totalBeds']))
-        FIRST = start(update, context)
+        FIRST = start_over(update, context)
         return FIRST
 
 def news(update, context):
@@ -537,7 +564,7 @@ def news(update, context):
         chat_id=update.effective_chat.id,
         text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
     r = requests.get(
-        'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
+        'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
     )
     data = r.json()
     data = data['articles']
@@ -553,7 +580,7 @@ def news(update, context):
                    photo=data[2]['urlToImage'],
                    caption=data[2]['title'] + "\n\n" + data[2]['description'] +
                    "\n\nRead More: " + data[2]['url'])
-    FIRST = start(update, context)
+    FIRST = start_over(update, context)
     return FIRST
 
 def helpline(update, context):
@@ -580,7 +607,7 @@ def helpline(update, context):
                          "Email - " + data['data']['contacts']['primary']['email'] + "\n" +
                          "Twitter - " + data['data']['contacts']['primary']['twitter'] + "\n" +
                          "Facebook - " + data['data']['contacts']['primary']['facebook'] + "\n")
-        FIRST = start(update, context)
+        FIRST = start_over(update, context)
         return FIRST
 
 def newsdaily(context):
@@ -589,7 +616,7 @@ def newsdaily(context):
         chat_id=context.job.context,
         text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
     r = requests.get(
-        'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
+        'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
     )
     data = r.json()
     data = data['articles']
@@ -611,7 +638,7 @@ def daily_job(update, context):
     bot = context.bot
     bot.send_message(chat_id=update.message.chat_id, text='Setting a daily notifications!')
     t = time(9, 56, 00, 000000)
-    context.job_queue.run_repeating(newsdaily, 10)
+    context.job_queue.run_repeating(newsdaily, 36000, context=update.message.chat_id)
 
     
 def main():
@@ -637,7 +664,7 @@ def main():
                 CallbackQueryHandler(selfdiagnosis, pattern='^' + 'selfdiagnosis' + '$'),
                 CallbackQueryHandler(helpline, pattern='^' + 'helpline' + '$'),
                 CallbackQueryHandler(updates, pattern='^' + 'updates' + '$'),
-                CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
+                CallbackQueryHandler(start_over, pattern='^' + 'return' + '$'),
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
                 CallbackQueryHandler(mycountry, pattern='^' + 'mycountry' + '$'),
@@ -646,13 +673,13 @@ def main():
             'Update1': [
                 CallbackQueryHandler(news, pattern='^' + 'latestnews' + '$'),
                 CallbackQueryHandler(stats, pattern='^' + 'stats' + '$'),
-                CallbackQueryHandler(start, pattern='^' + 'return' + '$')
+                CallbackQueryHandler(start_over, pattern='^' + 'return' + '$')
             ],
             'st_1': [
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
                 CallbackQueryHandler(mycountry, pattern='^' + 'mycountry' + '$'),
-                CallbackQueryHandler(start, pattern='^' + 'return' + '$')
+                CallbackQueryHandler(start_over, pattern='^' + 'return' + '$')
             ],
             'sd_1': [
                 CallbackQueryHandler(gender, pattern='^' + 'gender1' + '$'),
@@ -684,7 +711,7 @@ def main():
                            CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
                            CallbackQueryHandler(showhospitaldata, pattern='^' + 'showhospitaldata' + '$')]
         },
-        fallbacks=[CommandHandler('start', start)])
+        fallbacks=[CommandHandler('start', start_over)])
 
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
@@ -693,6 +720,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('stats', stats))
     updater.dispatcher.add_handler(CommandHandler('worst5', worst5))
     updater.dispatcher.add_handler(CommandHandler('least5', least5))
+    updater.dispatcher.add_handler(CommandHandler('india', mycountry))
     updater.dispatcher.add_handler(CommandHandler('help', help))
     updater.dispatcher.add_error_handler(error)
 
