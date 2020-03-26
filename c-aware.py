@@ -34,31 +34,30 @@ def start(update, context):
                              callback_data='selfdiagnosis')
     ],
                 [
-                    
                     InlineKeyboardButton("COVID-19 News and Stats \u23F3",
                                          callback_data='updates')
                 ],
                 [
-                    InlineKeyboardButton(
-                        "Contact and Helpline \U0001F198",
-                        callback_data='helpline')
+                    InlineKeyboardButton("Contact and Helpline \U0001F198",
+                                         callback_data='helpline')
                 ]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    bot.send_message(chat_id=update.effective_chat.id,
-                     text="Hi, I\'m the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India." +
-                              "\n\nYou can control me by sending these commands:\n\n"+
-                              "/start - Start the Bot\n"+
-                              "/notify - Automatic News Updates (10 hours)\n" + 
-                              "/news - Top 3 News about COVID-19 in India\n"+
-                              "/stats - World COVID-19 Stats\n"+
-                              "/worst5 - Countries Worst Hit by the coronavirus\n"+
-                              "/least5 - Countries Least Hit by the coronavirus\n"+
-                              "/india - India COVID-19 Stats and Hospital Data",
-                     reply_markup=reply_markup)
+    bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=
+        "Hi, I\'m the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India."
+        + "\n\nYou can control me by sending these commands:\n\n" +
+        "/start - Start the Bot\n" +
+        "/notify - Automatic News Updates (10 hours)\n" +
+        "/news - Top 3 News about COVID-19 in India\n" +
+        "/stats - World COVID-19 Stats\n" +
+        "/worst5 - Countries Worst Hit by the coronavirus\n" +
+        "/least5 - Countries Least Hit by the coronavirus\n" +
+        "/india - India COVID-19 Stats and Hospital Data",
+        reply_markup=reply_markup)
 
-    
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return FIRST
@@ -79,23 +78,21 @@ def start_over(update, context):
                              callback_data='selfdiagnosis')
     ],
                 [
-                    
                     InlineKeyboardButton("COVID-19 News and Stats \u23F3",
                                          callback_data='updates')
                 ],
                 [
-                    InlineKeyboardButton(
-                        "Contact and Helpline \U0001F198",
-                        callback_data='helpline')
+                    InlineKeyboardButton("Contact and Helpline \U0001F198",
+                                         callback_data='helpline')
                 ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Instead of sending a new message, edit the message that
     # originated the CallbackQuery. This gives the feeling of an
     # interactive menu.
     bot.send_message(chat_id=query.message.chat_id,
-                         message_id=query.message.message_id,
-                          text="What can I do for you?",
-                          reply_markup=reply_markup)
+                     message_id=query.message.message_id,
+                     text="What can I do for you?",
+                     reply_markup=reply_markup)
     return FIRST
 
 
@@ -106,15 +103,16 @@ def button(update, context):
 
 
 def help(update, context):
-    update.message.reply_text("Hi, I'm the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India."+
-                              "\n\n You can control me by sending these command:\n\n"+
-                              "/start - Start the Bot\n"+
-                              "notify - Automatic News Updates (10 hours)\n" + 
-                              "/news - Top 3 News about COVID-19 in India\n"+
-                              "/stats - World COVID-19 Stats\n"+
-                              "/worst5 - Countries Worst Hit by the coronavirus\n"+
-                              "/least5 - Countries Least Hit by the coronaviurs\n"+
-                              "/india - India COVID-19 Stats and Hospital Data")
+    update.message.reply_text(
+        "Hi, I'm the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India."
+        + "\n\n You can control me by sending these command:\n\n" +
+        "/start - Start the Bot\n" +
+        "notify - Automatic News Updates (10 hours)\n" +
+        "/news - Top 3 News about COVID-19 in India\n" +
+        "/stats - World COVID-19 Stats\n" +
+        "/worst5 - Countries Worst Hit by the coronavirus\n" +
+        "/least5 - Countries Least Hit by the coronaviurs\n" +
+        "/india - India COVID-19 Stats and Hospital Data")
 
 
 def error(update, context):
@@ -268,7 +266,7 @@ def diagnosis(update, context):
         bot.send_message(
             chat_id=update.effective_chat.id,
             text=
-            "Stay home and take care of yourself. Call your provider if you get worse."
+            "Stay home and take care of yourself.Call emergency helpine if you get worse. "
             +
             "Sorry you’re feeling ill. You have one or more symptom(s) that may be related to COVID-19."
         )
@@ -276,7 +274,8 @@ def diagnosis(update, context):
         bot.send_message(
             chat_id=update.effective_chat.id,
             text=
-            "Sorry you’re feeling ill. Call your provider if you get worse. " +
+            "Sorry you’re feeling ill. Call emergency helpine if you get worse. "
+            +
             "Since you haven't directly come in contact with someone diagnosed with COVID-19 or live in or visit a place where COVID-19 "
             +
             "is spreading there are less chances of you contracting COVID-19. Stay at home and monitor your symptoms"
@@ -494,6 +493,7 @@ def least5(update, context):
         reply_markup=reply_markup)
     return FIRST
 
+
 @send_typing_action
 def mycountry(update, context):
     """Shows India COVID-19 Stats"""
@@ -505,23 +505,29 @@ def mycountry(update, context):
                               message_id=query.message.message_id,
                               text=query.message.text)
 
-    keyboard = [[
-        InlineKeyboardButton("Show Hospital Data \U0001F469", #\U000200D \U0002695
-                             callback_data='showhospitaldata')],
-        [InlineKeyboardButton("Return to Previous Menu \U0001F519",
-                             callback_data='return')]]
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "Show Hospital Data \U0001F469",  #\U000200D \U0002695
+                callback_data='showhospitaldata')
+        ],
+        [
+            InlineKeyboardButton("Return to Previous Menu \U0001F519",
+                                 callback_data='return')
+        ]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     data = getstats('india')
     bot.send_message(
         chat_id=update.effective_chat.id,
-        text= flag.flag('IN') + " India COVID-19 Stats " + flag.flag('IN') + "\n\n" +
-        "Total Cases: " + str(data['cases']) +
-        "\n Cases Today: " + str(data['todayCases']) +
-        "\n Total Deaths: " + str(data['deaths']) +
-        "\n Deaths Today: " + str(data['todayDeaths']) +
-        "\n Recovered: " + str(data['recovered']),
+        text=flag.flag('IN') + " India COVID-19 Stats " + flag.flag('IN') +
+        "\n\n" + "Total Cases: " + str(data['cases']) + "\n Cases Today: " +
+        str(data['todayCases']) + "\n Total Deaths: " + str(data['deaths']) +
+        "\n Deaths Today: " + str(data['todayDeaths']) + "\n Recovered: " +
+        str(data['recovered']),
         reply_markup=reply_markup)
     return 'mycountry'
+
 
 def showhospitaldata(update, context):
     """Shows India COVID-19 Stats"""
@@ -530,28 +536,33 @@ def showhospitaldata(update, context):
     user = update.effective_message.from_user
     user_location = update.effective_message.location
     if user_location == None:
-        location_keyboard = telegram.KeyboardButton(text="send_location", request_location=True)
-        custom_keyboard = [[ location_keyboard]]
+        location_keyboard = telegram.KeyboardButton(
+            text="Send your location \U0001F5FA", request_location=True)
+        custom_keyboard = [[location_keyboard]]
         reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
-        bot.send_message(chat_id=update.effective_chat.id, text="Would you mind sharing your location with me?", reply_markup=reply_markup)
+        bot.send_message(chat_id=update.effective_chat.id,
+                         text="Would you mind sharing your location with me?",
+                         reply_markup=reply_markup)
         return 'mycountry'
     else:
         result = rg.search((user_location.latitude, user_location.longitude))
         print(result[0]['admin1'])
         r = requests.get('https://api.rootnet.in/covid19-in/stats/hospitals')
         data = r.json()
-        res = next((sub for sub in data['data']['regional'] if sub['state'] == result[0]['admin1']), None)
-        bot.send_message(
-        chat_id=update.effective_chat.id,
-        text= "\U0001F3E5 " + result[0]['admin1'] + " Hospital Stats \U0001F3E5\n\n" +
-        "Rural Hospitals: " + str(res['ruralHospitals']) +
-        "\n Rural Beds: " + str(res['ruralBeds']) +
-        "\n Urban Hospitals: " + str(res['urbanHospitals']) +
-        "\n Urban Beds: " + str(res['urbanBeds']) +
-        "\n Total Hospitals: " + str(res['totalHospitals']) +
-        "\n Total Beds: " + str(res['totalBeds']))
+        res = next((sub for sub in data['data']['regional']
+                    if sub['state'] == result[0]['admin1']), None)
+        bot.send_message(chat_id=update.effective_chat.id,
+                         text="\U0001F3E5 " + result[0]['admin1'] +
+                         " Hospital Stats \U0001F3E5\n\n" +
+                         "Rural Hospitals: " + str(res['ruralHospitals']) +
+                         "\n Rural Beds: " + str(res['ruralBeds']) +
+                         "\n Urban Hospitals: " + str(res['urbanHospitals']) +
+                         "\n Urban Beds: " + str(res['urbanBeds']) +
+                         "\n Total Hospitals: " + str(res['totalHospitals']) +
+                         "\n Total Beds: " + str(res['totalBeds']))
         FIRST = start_over(update, context)
         return FIRST
+
 
 def news(update, context):
     query = update.callback_query
@@ -583,32 +594,42 @@ def news(update, context):
     FIRST = start_over(update, context)
     return FIRST
 
+
 def helpline(update, context):
     query = update.callback_query
     bot = context.bot
     user = update.effective_message.from_user
     user_location = update.effective_message.location
     if user_location == None:
-        location_keyboard = telegram.KeyboardButton(text="send_location", request_location=True)
-        custom_keyboard = [[ location_keyboard]]
+        location_keyboard = telegram.KeyboardButton(
+            text="Send your location \U0001F5FA", request_location=True)
+        custom_keyboard = [[location_keyboard]]
         reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
-        bot.send_message(chat_id=update.effective_chat.id, text="Would you mind sharing your location with me?", reply_markup=reply_markup)
+        bot.send_message(chat_id=update.effective_chat.id,
+                         text="Would you mind sharing your location with me?",
+                         reply_markup=reply_markup)
     else:
         result = rg.search((user_location.latitude, user_location.longitude))
         print(result[0]['admin1'])
         r = requests.get('https://api.rootnet.in/covid19-in/contacts')
         data = r.json()
-        res = next((sub for sub in data['data']['contacts']['regional'] if sub['loc'] == result[0]['admin1']), None)
-        bot.send_message(chat_id = update.effective_chat.id,
-                         text = "\U0001F4F2 COVID-19 Helpline Contacts \U0001F4F2\n\n" +
-                         res['loc'] + " State Number - " + res['number'] + "\n" +
-                         "National Number - " + data['data']['contacts']['primary']['number'] + "\n" +
-                         "Toll Free Number - " + data['data']['contacts']['primary']['number-tollfree'] + "\n" +
-                         "Email - " + data['data']['contacts']['primary']['email'] + "\n" +
-                         "Twitter - " + data['data']['contacts']['primary']['twitter'] + "\n" +
-                         "Facebook - " + data['data']['contacts']['primary']['facebook'] + "\n")
+        res = next((sub for sub in data['data']['contacts']['regional']
+                    if sub['loc'] == result[0]['admin1']), None)
+        bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="\U0001F4F2 COVID-19 Helpline Contacts \U0001F4F2\n\n" +
+            res['loc'] + " State Number - " + res['number'] + "\n" +
+            "National Number - " +
+            data['data']['contacts']['primary']['number'] + "\n" +
+            "Toll Free Number - " +
+            data['data']['contacts']['primary']['number-tollfree'] + "\n" +
+            "Email - " + data['data']['contacts']['primary']['email'] + "\n" +
+            "Twitter - " + data['data']['contacts']['primary']['twitter'] +
+            "\n" + "Facebook - " +
+            data['data']['contacts']['primary']['facebook'] + "\n")
         FIRST = start_over(update, context)
         return FIRST
+
 
 def newsdaily(context):
     bot = context.bot
@@ -632,15 +653,19 @@ def newsdaily(context):
                    photo=data[2]['urlToImage'],
                    caption=data[2]['title'] + "\n\n" + data[2]['description'] +
                    "\n\nRead More: " + data[2]['url'])
-    
+
+
 def daily_job(update, context):
     """ Running on Mon, Tue, Wed, Thu, Fri = tuple(range(5)) """
     bot = context.bot
-    bot.send_message(chat_id=update.message.chat_id, text='Setting a daily notifications!')
+    bot.send_message(chat_id=update.message.chat_id,
+                     text='Setting a daily notifications!')
     t = time(9, 56, 00, 000000)
-    context.job_queue.run_repeating(newsdaily, 36000, context=update.message.chat_id)
+    context.job_queue.run_repeating(newsdaily,
+                                    36000,
+                                    context=update.message.chat_id)
 
-    
+
 def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
@@ -654,20 +679,21 @@ def main():
     # ^ means "start of line/string"
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
-    
+
     conv_handler = ConversationHandler(
-        entry_points=[
-            CommandHandler('start', start)],
+        entry_points=[CommandHandler('start', start)],
         states={
             FIRST: [
                 MessageHandler(Filters.location, helpline),
-                CallbackQueryHandler(selfdiagnosis, pattern='^' + 'selfdiagnosis' + '$'),
+                CallbackQueryHandler(selfdiagnosis,
+                                     pattern='^' + 'selfdiagnosis' + '$'),
                 CallbackQueryHandler(helpline, pattern='^' + 'helpline' + '$'),
                 CallbackQueryHandler(updates, pattern='^' + 'updates' + '$'),
                 CallbackQueryHandler(start_over, pattern='^' + 'return' + '$'),
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
-                CallbackQueryHandler(mycountry, pattern='^' + 'mycountry' + '$'),
+                CallbackQueryHandler(mycountry,
+                                     pattern='^' + 'mycountry' + '$'),
                 CallbackQueryHandler(stats, pattern='^' + 'stats' + '$'),
             ],
             'Update1': [
@@ -678,7 +704,8 @@ def main():
             'st_1': [
                 CallbackQueryHandler(worst5, pattern='^' + 'worst5' + '$'),
                 CallbackQueryHandler(least5, pattern='^' + 'least5' + '$'),
-                CallbackQueryHandler(mycountry, pattern='^' + 'mycountry' + '$'),
+                CallbackQueryHandler(mycountry,
+                                     pattern='^' + 'mycountry' + '$'),
                 CallbackQueryHandler(start_over, pattern='^' + 'return' + '$')
             ],
             'sd_1': [
@@ -707,9 +734,12 @@ def main():
                 CallbackQueryHandler(diagnosis,
                                      pattern='^' + 'diagnosis0' + '$'),
             ],
-            'mycountry' : [MessageHandler(Filters.location, showhospitaldata),
-                           CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
-                           CallbackQueryHandler(showhospitaldata, pattern='^' + 'showhospitaldata' + '$')]
+            'mycountry': [
+                MessageHandler(Filters.location, showhospitaldata),
+                CallbackQueryHandler(start, pattern='^' + 'return' + '$'),
+                CallbackQueryHandler(showhospitaldata,
+                                     pattern='^' + 'showhospitaldata' + '$')
+            ]
         },
         fallbacks=[CommandHandler('start', start_over)])
 
