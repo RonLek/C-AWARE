@@ -50,8 +50,7 @@ def start(update, context):
         "/news - Top 3 News about COVID-19 in India\n" +
         "/stats - World COVID-19 Stats\n" +
         "/worst5 - Countries Worst Hit by the coronavirus\n" +
-        "/least5 - Countries Least Hit by the coronavirus\n" +
-        "/india - India COVID-19 Stats and Hospital Data",
+        "/least5 - Countries Least Hit by the coronavirus\n",
         reply_markup=reply_markup)
 
 
@@ -102,12 +101,11 @@ def help(update, context):
         "Hi, I'm the C-AWARE Bot. I can help you to self diagnose yourself and to provide latest news and stats about the COVID-19 outbreak in India."
         + "\n\n You can control me by sending these command:\n\n" +
         "/start - Start the Bot\n" +
-        "notify - Automatic News Updates (10 hours)\n" +
+        "/notify - Automatic News Updates (10 hours)\n" +
         "/news - Top 3 News about COVID-19 in India\n" +
         "/stats - World COVID-19 Stats\n" +
         "/worst5 - Countries Worst Hit by the coronavirus\n" +
-        "/least5 - Countries Least Hit by the coronaviurs\n" +
-        "/india - India COVID-19 Stats and Hospital Data")
+        "/least5 - Countries Least Hit by the coronaviurs\n")
 
 
 def error(update, context):
@@ -523,13 +521,14 @@ def mycountry(update, context):
         reply_markup=reply_markup)
     return 'mycountry'
 
-
+@send_typing_action
 def showhospitaldata(update, context):
     """Shows India COVID-19 Stats"""
     query = update.callback_query
     bot = context.bot
     user = update.effective_message.from_user
     user_location = update.effective_message.location
+    print('Came Here')
     if user_location == None:
         location_keyboard = telegram.KeyboardButton(
             text="Send your location \U0001F5FA", request_location=True)
@@ -660,6 +659,9 @@ def daily_job(update, context):
                                     36000,
                                     context=update.message.chat_id)
 
+def unknown(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command. Type /help for a list of commands.")
+
 
 def main():
     # Create the Updater and pass it your bot's token.
@@ -738,6 +740,7 @@ def main():
         },
         fallbacks=[CommandHandler('start', start)])
 
+    
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('notify', daily_job))
@@ -745,8 +748,9 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('stats', stats))
     updater.dispatcher.add_handler(CommandHandler('worst5', worst5))
     updater.dispatcher.add_handler(CommandHandler('least5', least5))
-    updater.dispatcher.add_handler(CommandHandler('india', mycountry))
     updater.dispatcher.add_handler(CommandHandler('help', help))
+    updater.dispatcher.add_handler(MessageHandler(Filters.command, unknown))
+    
     updater.dispatcher.add_error_handler(error)
 
     # Start the Bot
