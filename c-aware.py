@@ -1,4 +1,5 @@
 import logging
+import time as t
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ChatAction, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, Filters, JobQueue
@@ -53,7 +54,6 @@ def start(update, context):
         "/least5 - Countries Least Hit by the coronavirus\n",
         reply_markup=reply_markup)
 
-
     # Tell ConversationHandler that we're in state `FIRST` now
     return FIRST
 
@@ -61,12 +61,13 @@ def start(update, context):
 def start_over(update, context):
     """Prompt same text & keyboard as `start` does but not as new message"""
     # Get CallbackQuery from Update
+    t.sleep(8)
     query = update.callback_query
     # Get Bot from CallbackContext
     bot = context.bot
     bot.edit_message_text(chat_id=update.effective_chat.id,
-                              message_id=update.effective_message.message_id,
-                              text=update.effective_message.text)
+                          message_id=update.effective_message.message_id,
+                          text=update.effective_message.text)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -521,6 +522,7 @@ def mycountry(update, context):
         reply_markup=reply_markup)
     return 'mycountry'
 
+
 @send_typing_action
 def showhospitaldata(update, context):
     """Shows India COVID-19 Stats"""
@@ -555,6 +557,7 @@ def showhospitaldata(update, context):
                          "\n Total Hospitals: " + str(res['totalHospitals']) +
                          "\n Total Beds: " + str(res['totalBeds']))
         FIRST = start(update, context)
+        t.sleep(8)
         return FIRST
 
 
@@ -622,6 +625,7 @@ def helpline(update, context):
             "\n" + "Facebook - " +
             data['data']['contacts']['primary']['facebook'] + "\n")
         FIRST = start(update, context)
+        t.sleep(8)
         return FIRST
 
 
@@ -659,8 +663,13 @@ def daily_job(update, context):
                                     36000,
                                     context=update.message.chat_id)
 
+
 def unknown(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command. Type /help for a list of commands.")
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=
+        "Sorry, I didn't understand that command. Type /help for a list of commands."
+    )
 
 
 def main():
@@ -740,7 +749,6 @@ def main():
         },
         fallbacks=[CommandHandler('start', start)])
 
-    
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('notify', daily_job))
@@ -750,7 +758,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('least5', least5))
     updater.dispatcher.add_handler(CommandHandler('help', help))
     updater.dispatcher.add_handler(MessageHandler(Filters.command, unknown))
-    
+
     updater.dispatcher.add_error_handler(error)
 
     # Start the Bot
