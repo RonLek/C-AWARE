@@ -1,11 +1,12 @@
 import logging
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ChatAction, ReplyKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, Filters, JobQueue
 import requests
 from functools import wraps
 import flag
-import reverse_geocoder as rg 
+import reverse_geocoder as rg
+from datetime import time
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -48,6 +49,8 @@ def start(update, context):
     bot.send_message(chat_id=update.effective_chat.id,
                      text='What can I do for you?',
                      reply_markup=reply_markup)
+
+    
 
     # Tell ConversationHandler that we're in state `FIRST` now
     return FIRST
@@ -248,7 +251,7 @@ def diagnosis(update, context):
         bot.send_message(
             chat_id=update.effective_chat.id,
             text=
-            "Sorry you’re feeling ill. Call your provider if you get worse." +
+            "Sorry you’re feeling ill. Call your provider if you get worse. " +
             "Since you haven't directly come in contact with someone diagnosed with COVID-19 or live in or visit a place where COVID-19 "
             +
             "is spreading there are less chances of you contracting COVID-19. Stay at home and monitor your symptoms"
@@ -579,6 +582,37 @@ def helpline(update, context):
                          "Facebook - " + data['data']['contacts']['primary']['facebook'] + "\n")
         FIRST = start(update, context)
         return FIRST
+
+def newsdaily(context):
+    bot = context.bot
+    bot.send_message(
+        chat_id=context.job.context,
+        text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
+    r = requests.get(
+        'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&sources=google-news&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
+    )
+    data = r.json()
+    data = data['articles']
+    bot.send_photo(chat_id=context.job.context,
+                   photo=data[0]['urlToImage'],
+                   caption=data[0]['title'] + "\n\n" + data[0]['description'] +
+                   "\n\nRead More: " + data[0]['url'])
+    bot.send_photo(chat_id=context.job.context,
+                   photo=data[1]['urlToImage'],
+                   caption=data[1]['title'] + "\n\n" + data[1]['description'] +
+                   "\n\nRead More: " + data[1]['url'])
+    bot.send_photo(chat_id=context.job.context,
+                   photo=data[2]['urlToImage'],
+                   caption=data[2]['title'] + "\n\n" + data[2]['description'] +
+                   "\n\nRead More: " + data[2]['url'])
+    
+def daily_job(update, context):
+    """ Running on Mon, Tue, Wed, Thu, Fri = tuple(range(5)) """
+    bot = context.bot
+    bot.send_message(chat_id=update.message.chat_id, text='Setting a daily notifications!')
+    t = time(9, 56, 00, 000000)
+    context.job_queue.run_repeating(newsdaily, 10)
+
     
 def main():
     # Create the Updater and pass it your bot's token.
@@ -593,6 +627,7 @@ def main():
     # ^ means "start of line/string"
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
+    
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler('start', start)],
@@ -653,6 +688,7 @@ def main():
 
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CommandHandler('notify', daily_job))
     updater.dispatcher.add_handler(CommandHandler('news', news))
     updater.dispatcher.add_handler(CommandHandler('stats', stats))
     updater.dispatcher.add_handler(CommandHandler('worst5', worst5))
