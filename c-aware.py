@@ -25,10 +25,6 @@ def start(update, context):
     query = update.callback_query
     # Get Bot from CallbackContext
     bot = context.bot
-    if query != None:
-        bot.edit_message_text(chat_id=query.message.chat_id,
-                              message_id=query.message.message_id,
-                              text=query.message.text)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -69,10 +65,9 @@ def start_over(update, context):
     query = update.callback_query
     # Get Bot from CallbackContext
     bot = context.bot
-    if query != None:
-        bot.edit_message_text(chat_id=query.message.chat_id,
-                              message_id=query.message.message_id,
-                              text=query.message.text)
+    bot.edit_message_text(chat_id=update.effective_chat.id,
+                              message_id=update.effective_message.message_id,
+                              text=update.effective_message.text)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -288,8 +283,8 @@ def diagnosis(update, context):
             +
             "is spreading there are less chances of you contracting COVID-19.\n Please stay indoors."
         )
-        FIRST = start_over(update, context)
-        return FIRST
+    FIRST = start_over(update, context)
+    return FIRST
 
 
 def updates(update, context):
@@ -404,7 +399,7 @@ def worst5(update, context):
     data = getstats('worst5')
     bot.send_message(
         chat_id=update.effective_chat.id,
-        text="\uF3F4 TOP 5 WORST HIT \uF3F4 \n\n\u0031 " +
+        text="\u2691 TOP 5 WORST HIT \u2691 \n\n\u0031 " +
         str(data[0]['country']) + " " +
         flag.flag(str(data[0]['countryInfo']['iso2'])) + "\n Total Cases: " +
         str(data[0]['cases']) + "\n Cases Today: " +
@@ -455,7 +450,7 @@ def least5(update, context):
                              callback_data='return')
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    data = getstats('worst5')
+    data = getstats('least5')
     bot.send_message(
         chat_id=update.effective_chat.id,
         text="\U0001F6A9 TOP 5 LEAST HIT \U0001F6A9 \n\n \u0031" +
@@ -560,7 +555,7 @@ def showhospitaldata(update, context):
                          "\n Urban Beds: " + str(res['urbanBeds']) +
                          "\n Total Hospitals: " + str(res['totalHospitals']) +
                          "\n Total Beds: " + str(res['totalBeds']))
-        FIRST = start_over(update, context)
+        FIRST = start(update, context)
         return FIRST
 
 
@@ -627,7 +622,7 @@ def helpline(update, context):
             "Twitter - " + data['data']['contacts']['primary']['twitter'] +
             "\n" + "Facebook - " +
             data['data']['contacts']['primary']['facebook'] + "\n")
-        FIRST = start_over(update, context)
+        FIRST = start(update, context)
         return FIRST
 
 
@@ -741,7 +736,7 @@ def main():
                                      pattern='^' + 'showhospitaldata' + '$')
             ]
         },
-        fallbacks=[CommandHandler('start', start_over)])
+        fallbacks=[CommandHandler('start', start)])
 
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
