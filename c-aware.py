@@ -7,7 +7,7 @@ import requests
 from functools import wraps
 import flag
 import reverse_geocoder as rg
-from datetime import time
+import datetime
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -26,6 +26,14 @@ def start(update, context):
     query = update.callback_query
     # Get Bot from CallbackContext
     bot = context.bot
+
+    # Store user information
+    user = update.message.from_user
+    with open('userinfo.txt', 'a') as f:
+        f.write("\ntime:" + str(datetime.datetime.now()) + " username:" + str(user['username']) + " userid:" + str(user['id']) +
+                                    " fullname:" + user['first_name'] + " " + user['last_name'])
+
+    daily_job(update, context)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -556,8 +564,8 @@ def showhospitaldata(update, context):
                          "\n Urban Beds: " + str(res['urbanBeds']) +
                          "\n Total Hospitals: " + str(res['totalHospitals']) +
                          "\n Total Beds: " + str(res['totalBeds']))
-        FIRST = start(update, context)
         t.sleep(8)
+        FIRST = start(update, context)
         return FIRST
 
 
@@ -656,11 +664,10 @@ def newsdaily(context):
 def daily_job(update, context):
     """ Running on Mon, Tue, Wed, Thu, Fri = tuple(range(5)) """
     bot = context.bot
-    bot.send_message(chat_id=update.message.chat_id,
-                     text='Setting a daily notifications!')
-    t = time(9, 56, 00, 000000)
+    #bot.send_message(chat_id=update.message.chat_id,
+    #                 text='Setting a daily notifications!')
     context.job_queue.run_repeating(newsdaily,
-                                    36000,
+                                    7200,
                                     context=update.message.chat_id)
 
 
