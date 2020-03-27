@@ -420,7 +420,7 @@ def worst5(update, context):
         str(data[1]['deaths']) + "\n Deaths Today: " +
         str(data[1]['todayDeaths']) + "\n Recovered: " +
         str(data[1]['recovered']) + "\n\n \u0033 " + str(data[2]['country']) +
-        " " + flag.flag('US') + "\n Total Cases: " + str(data[2]['cases']) +
+        " " + flag.flag(str(data[1]['countryInfo']['iso2'])) + "\n Total Cases: " + str(data[2]['cases']) +
         "\n Cases Today: " + str(data[2]['todayCases']) + "\n Total Deaths: " +
         str(data[2]['deaths']) + "\n Deaths Today: " +
         str(data[2]['todayDeaths']) + "\n Recovered: " +
@@ -462,7 +462,7 @@ def least5(update, context):
         chat_id=update.effective_chat.id,
         text="\U0001F6A9 TOP 5 LEAST HIT \U0001F6A9 \n\n \u0031" +
         data[4]['country'] + " " +
-        flag.flag(str(data[0]['countryInfo']['iso2'])) + "\n Total Cases: " +
+        flag.flag(str(data[4]['countryInfo']['iso2'])) + "\n Total Cases: " +
         str(data[4]['cases']) + "\n Cases Today: " +
         str(data[4]['todayCases']) + "\n Total Deaths: " +
         str(data[4]['deaths']) + "\n Deaths Today: " +
@@ -578,7 +578,7 @@ def news(update, context):
                               text="Done")
     bot.send_message(
         chat_id=update.effective_chat.id,
-        text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
+        text="\U0001F4F0 Top 3 Headlines Around India \U0001F4F0")
     r = requests.get(
         'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
     )
@@ -641,7 +641,7 @@ def newsdaily(context):
     bot = context.bot
     bot.send_message(
         chat_id=context.job.context,
-        text="\U0001F4F0 Top 3 Headlines Around the World \U0001F4F0")
+        text="\U0001F4F0 Headline of the Day \U0001F4F0")
     r = requests.get(
         'http://newsapi.org/v2/top-headlines?country=in&q=coronavirus&apiKey=c2e7ef1989004dfa8be6a78dacd148b5'
     )
@@ -651,14 +651,6 @@ def newsdaily(context):
                    photo=data[0]['urlToImage'],
                    caption=data[0]['title'] + "\n\n" + data[0]['description'] +
                    "\n\nRead More: " + data[0]['url'])
-    bot.send_photo(chat_id=context.job.context,
-                   photo=data[1]['urlToImage'],
-                   caption=data[1]['title'] + "\n\n" + data[1]['description'] +
-                   "\n\nRead More: " + data[1]['url'])
-    bot.send_photo(chat_id=context.job.context,
-                   photo=data[2]['urlToImage'],
-                   caption=data[2]['title'] + "\n\n" + data[2]['description'] +
-                   "\n\nRead More: " + data[2]['url'])
 
 
 def daily_job(update, context):
@@ -666,9 +658,8 @@ def daily_job(update, context):
     bot = context.bot
     #bot.send_message(chat_id=update.message.chat_id,
     #                 text='Setting a daily notifications!')
-    context.job_queue.run_repeating(newsdaily,
-                                    7200,
-                                    context=update.message.chat_id)
+    t = datetime.time(4, 30, 00, 000000)
+    context.job_queue.run_daily(newsdaily, t, days=tuple(range(7)), context=update.message.chat_id)
 
 
 def unknown(update, context):
