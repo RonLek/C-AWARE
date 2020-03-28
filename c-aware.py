@@ -19,7 +19,7 @@ FIRST, SECOND = range(2)
 
 sd_decider = 0
 sd_secondarydecider = 0
-
+notifyglobal = 1
 
 def start(update, context):
     # Get CallbackQuery from Update
@@ -27,13 +27,18 @@ def start(update, context):
     # Get Bot from CallbackContext
     bot = context.bot
 
+    #Notification
+    global notifyglobal
+    if notifyglobal:
+        daily_job(update, context)
+        print('NotifyGlobal = ', notifyglobal)
+        notifyglobal = 0
+
     # Store user information
     user = update.message.from_user
     with open('userinfo.txt', 'a') as f:
         f.write("\ntime:" + str(datetime.datetime.now()) + " username:" + str(user['username']) + " userid:" + str(user['id']) +
                                     " fullname:" + user['first_name'] + " " + user['last_name'])
-
-    daily_job(update, context)
     keyboard = [[
         InlineKeyboardButton("Self Diagnosis \U0001F637",
                              callback_data='selfdiagnosis')
@@ -420,7 +425,7 @@ def worst5(update, context):
         str(data[1]['deaths']) + "\n Deaths Today: " +
         str(data[1]['todayDeaths']) + "\n Recovered: " +
         str(data[1]['recovered']) + "\n\n \u0033 " + str(data[2]['country']) +
-        " " + flag.flag(str(data[1]['countryInfo']['iso2'])) + "\n Total Cases: " + str(data[2]['cases']) +
+        " " + flag.flag(str(data[2]['countryInfo']['iso2'])) + "\n Total Cases: " + str(data[2]['cases']) +
         "\n Cases Today: " + str(data[2]['todayCases']) + "\n Total Deaths: " +
         str(data[2]['deaths']) + "\n Deaths Today: " +
         str(data[2]['todayDeaths']) + "\n Recovered: " +
@@ -683,7 +688,6 @@ def main():
     # ^ means "start of line/string"
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
-
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
